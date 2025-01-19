@@ -1,4 +1,3 @@
-/* eslint-disable curly */
 export interface Node<T> {
     value: T
     list: ListContext<T> | null
@@ -38,6 +37,33 @@ export function createNode<T> (data: T): Node<T> {
         prev: null,
     }
 }
+
+export function createDoublyLinkedList<T> (iterable?: Iterable<T>) {
+    const list = createContext(iterable)
+    return {
+        get first () { return list.first },
+        get last () { return list.last },
+        get size () { return list.size },
+        insertFirst: insertFirst.bind(null, list),
+        insertLast: insertLast.bind(null, list),
+        insertBefore: insertBefore.bind(null, list),
+        insertAfter: insertAfter.bind(null, list),
+        remove: remove.bind(null, list),
+        removeFirst: removeFirst.bind(null, list),
+        removeLast: removeLast.bind(null, list),
+        peekFirst: peekFirst.bind(null, list),
+        peekLast: peekLast.bind(null, list),
+        traverse: traverse.bind(null, list),
+        traverseReverse: traverseReverse.bind(null, list),
+        find: find.bind(null, list),
+        findLast: findLast.bind(null, list),
+        toArray: toArray.bind(null, list),
+        clear: clear.bind(null, list),
+        getIterator: getIterator.bind(null, list),
+        getReverseIterator: getReverseIterator.bind(null, list),
+    }
+}
+export type DoublyLinkedList<T> = ReturnType<typeof createDoublyLinkedList<T>>
 
 export function peekFirst<T> (list: ListContext<T>): T | null {
     return list.first?.value ?? null
