@@ -5,12 +5,22 @@ export interface CacheOptions {
     capacity: number
 }
 
-export function createItem<K, V> (key: K, value: V) {
+export interface CacheItem<K, V> {
+    key: K
+    value: V
+}
+
+export interface CacheContext<K, V> {
+    capacity: number
+    map: Map<K, Node<CacheItem<K, V>>>
+    list: ReturnType<typeof createLinkedList<CacheItem<K, V>>>
+}
+
+export function createItem<K, V> (key: K, value: V): CacheItem<K, V> {
     return { key, value }
 }
-export type CacheItem<K, V> = ReturnType<typeof createItem<K, V>>
 
-export function createContext<K, V> (options: CacheOptions) {
+export function createContext<K, V> (options: CacheOptions): CacheContext<K, V> {
     if (options.capacity <= 0) throw new Error('Cache capacity must be greater than 0')
     return {
         capacity: options.capacity,
@@ -18,7 +28,6 @@ export function createContext<K, V> (options: CacheOptions) {
         list: createLinkedList<CacheItem<K, V>>(),
     }
 }
-export type CacheContext<K, V> = ReturnType<typeof createContext<K, V>>
 
 export function createLRUCache<K, V> (options: CacheOptions) {
     const cache = createContext<K, V>(options)
