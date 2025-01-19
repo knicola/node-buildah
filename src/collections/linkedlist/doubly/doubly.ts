@@ -1,12 +1,12 @@
 /* eslint-disable curly */
 export interface Node<T> {
     value: T
-    list: List<T> | null
+    list: ListContext<T> | null
     next: Node<T> | null
     prev: Node<T> | null
 }
 
-export interface List<T> {
+export interface ListContext<T> {
     first: Node<T> | null
     last: Node<T> | null
     size: number
@@ -14,8 +14,8 @@ export interface List<T> {
 
 export type NodeCallback<T> = (node: Node<T>) => void
 
-export function createList<T> (iterable?: Iterable<T> | null): List<T> {
-    const list: List<T> = {
+export function createContext<T> (iterable?: Iterable<T> | null): ListContext<T> {
+    const list: ListContext<T> = {
         first: null,
         last: null,
         size: 0,
@@ -39,15 +39,15 @@ export function createNode<T> (data: T): Node<T> {
     }
 }
 
-export function peekFirst<T> (list: List<T>): T | null {
+export function peekFirst<T> (list: ListContext<T>): T | null {
     return list.first?.value ?? null
 }
 
-export function peekLast<T> (list: List<T>): T | null {
+export function peekLast<T> (list: ListContext<T>): T | null {
     return list.last?.value ?? null
 }
 
-export function insertFirst<T> (list: List<T>, node: Node<T>): void {
+export function insertFirst<T> (list: ListContext<T>, node: Node<T>): void {
     if (node.list === list) throw new Error('Node is already in the list')
     if (node.list !== null) throw new Error('Node is already in another list')
 
@@ -62,7 +62,7 @@ export function insertFirst<T> (list: List<T>, node: Node<T>): void {
     list.size += 1
 }
 
-export function insertLast<T> (list: List<T>, node: Node<T>): void {
+export function insertLast<T> (list: ListContext<T>, node: Node<T>): void {
     if (node.list === list) throw new Error('Node is already in the list')
     if (node.list !== null) throw new Error('Node is already in another list')
 
@@ -77,7 +77,7 @@ export function insertLast<T> (list: List<T>, node: Node<T>): void {
     list.size += 1
 }
 
-export function insertBefore<T> (list: List<T>, refNode: Node<T>, node: Node<T>): void {
+export function insertBefore<T> (list: ListContext<T>, refNode: Node<T>, node: Node<T>): void {
     if (node.list === list) throw new Error('Node is already in the list')
     if (node.list !== null) throw new Error('Node is already in another list')
     if (refNode.list !== list) throw new Error('Reference node is not in the list')
@@ -93,7 +93,7 @@ export function insertBefore<T> (list: List<T>, refNode: Node<T>, node: Node<T>)
     list.size += 1
 }
 
-export function insertAfter<T> (list: List<T>, refNode: Node<T>, node: Node<T>): void {
+export function insertAfter<T> (list: ListContext<T>, refNode: Node<T>, node: Node<T>): void {
     if (node.list === list) throw new Error('Node is already in the list')
     if (node.list !== null) throw new Error('Node is already in another list')
     if (refNode.list !== list) throw new Error('Reference node is not in the list')
@@ -109,7 +109,7 @@ export function insertAfter<T> (list: List<T>, refNode: Node<T>, node: Node<T>):
     list.size += 1
 }
 
-export function remove<T> (list: List<T>, node: Node<T>): void {
+export function remove<T> (list: ListContext<T>, node: Node<T>): void {
     if (node.list !== list) throw new Error('Node is not in the list')
 
     if (node.prev) node.prev.next = node.next
@@ -125,7 +125,7 @@ export function remove<T> (list: List<T>, node: Node<T>): void {
     list.size -= 1
 }
 
-export function removeForward<T> (list: List<T>, start: Node<T>, n: number): void {
+export function removeForward<T> (list: ListContext<T>, start: Node<T>, n: number): void {
     if (start.list !== list) throw new Error('Node is not in the list')
 
     let current: Node<T> | null = start
@@ -150,7 +150,7 @@ export function removeForward<T> (list: List<T>, start: Node<T>, n: number): voi
     list.size -= count
 }
 
-export function removeBackward<T> (list: List<T>, start: Node<T>, n: number): void {
+export function removeBackward<T> (list: ListContext<T>, start: Node<T>, n: number): void {
     if (start.list !== list) throw new Error('Node is not in the list')
 
     let current: Node<T> | null = start
@@ -175,15 +175,15 @@ export function removeBackward<T> (list: List<T>, start: Node<T>, n: number): vo
     list.size -= count
 }
 
-export function removeFirst<T> (list: List<T>): void {
+export function removeFirst<T> (list: ListContext<T>): void {
     if (list.first) remove(list, list.first)
 }
 
-export function removeLast<T> (list: List<T>): void {
+export function removeLast<T> (list: ListContext<T>): void {
     if (list.last) remove(list, list.last)
 }
 
-export function * getIterator<T> (list: List<T>, from?: Node<T>): Generator<Node<T>> {
+export function * getIterator<T> (list: ListContext<T>, from?: Node<T>): Generator<Node<T>> {
     let current = list.first
 
     if (from) {
@@ -198,7 +198,7 @@ export function * getIterator<T> (list: List<T>, from?: Node<T>): Generator<Node
     }
 }
 
-export function * getReverseIterator<T> (list: List<T>, from?: Node<T>): Generator<Node<T>> {
+export function * getReverseIterator<T> (list: ListContext<T>, from?: Node<T>): Generator<Node<T>> {
     let current = list.last
 
     if (from) {
@@ -213,19 +213,19 @@ export function * getReverseIterator<T> (list: List<T>, from?: Node<T>): Generat
     }
 }
 
-export function traverse<T> (list: List<T>, fn: (node: Node<T>) => void): void {
+export function traverse<T> (list: ListContext<T>, fn: (node: Node<T>) => void): void {
     for (const node of getIterator(list)) {
         fn(node)
     }
 }
 
-export function traverseReverse<T> (list: List<T>, fn: (node: Node<T>) => void): void {
+export function traverseReverse<T> (list: ListContext<T>, fn: (node: Node<T>) => void): void {
     for (const node of getReverseIterator(list)) {
         fn(node)
     }
 }
 
-export function find<T> (list: List<T>, fn: (node: Node<T>) => boolean): Node<T> | null {
+export function find<T> (list: ListContext<T>, fn: (node: Node<T>) => boolean): Node<T> | null {
     for (const node of getIterator(list)) {
         if (fn(node)) return node
     }
@@ -233,7 +233,7 @@ export function find<T> (list: List<T>, fn: (node: Node<T>) => boolean): Node<T>
     return null
 }
 
-export function findLast<T> (list: List<T>, fn: (node: Node<T>) => boolean): Node<T> | null {
+export function findLast<T> (list: ListContext<T>, fn: (node: Node<T>) => boolean): Node<T> | null {
     for (const node of getReverseIterator(list)) {
         if (fn(node)) return node
     }
@@ -241,7 +241,7 @@ export function findLast<T> (list: List<T>, fn: (node: Node<T>) => boolean): Nod
     return null
 }
 
-export function toArray<T> (list: List<T>): T[] {
+export function toArray<T> (list: ListContext<T>): T[] {
     const result: T[] = []
 
     for (const node of getIterator(list)) {
@@ -251,7 +251,7 @@ export function toArray<T> (list: List<T>): T[] {
     return result
 }
 
-export function clear<T> (list: List<T>, unlinkNodes: boolean = true): void {
+export function clear<T> (list: ListContext<T>, unlinkNodes: boolean = true): void {
     if (unlinkNodes) {
         for (const node of getIterator(list)) {
             node.list = null

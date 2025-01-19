@@ -1,6 +1,6 @@
 import type { Node, NodeCallback } from './doubly'
 import {
-    createList,
+    createContext,
     peekFirst,
     peekLast,
     insertFirst,
@@ -54,7 +54,7 @@ export interface DoublyLinkedList<T> {
 }
 
 export function createDoublyLinkedList<T> (iterable?: Iterable<T>): DoublyLinkedList<T> {
-    const list = createList(iterable)
+    const list = createContext(iterable)
     return {
         get first () { return list.first },
         get last () { return list.last },

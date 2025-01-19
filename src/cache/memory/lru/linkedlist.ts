@@ -1,5 +1,5 @@
 import {
-    createList,
+    createContext,
     createNode,
     insertFirst,
     remove,
@@ -7,11 +7,9 @@ import {
 } from '@/collections/linkedlist/doubly'
 
 export function createLinkedList<T> () {
-    const list = createList<T>()
+    const list = createContext<T>()
     return {
-        get last () {
-            return list.last
-        },
+        get last () { return list.last },
         insertFirst: insertFirst.bind(null, list),
         remove: remove.bind(null, list),
         clear: clear.bind(null, list),
