@@ -39,7 +39,7 @@ export function createNode<T> (data: T): Node<T> {
 }
 
 export function createDoublyLinkedList<T> (iterable?: Iterable<T>) {
-    const list = createContext(iterable)
+    const list = createContext<T>(iterable)
     return {
         get first () { return list.first },
         get last () { return list.last },
