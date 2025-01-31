@@ -1,6 +1,6 @@
-import type { PropertyKey, DictionaryIterator, Dictionary } from './dictionary'
+import type { DictionaryKey, DictionaryIterator, Dictionary } from './dictionary'
 
-export class DictionaryObject<K extends PropertyKey, V> implements Map<K, V> {
+export class DictionaryObject<K extends DictionaryKey, V> implements Map<K, V> {
     protected object = Object.create(null)
 
     constructor (entries?: Iterable<[K, V]>) {
