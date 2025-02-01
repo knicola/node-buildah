@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
-import { FixedWindowCounterPolicy } from '../policies/fixedWindowCounter'
+import { FixedWindowCounterPolicy } from '../memory/fixedWindowCounter'
 import { MemoryStore } from '../stores/memory.store'
 
 const policy = new FixedWindowCounterPolicy({
