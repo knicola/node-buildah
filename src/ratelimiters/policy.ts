@@ -23,9 +23,3 @@ export interface RateLimiterPolicy {
     check (subject: string, weight?: number, timestamp?: number): Promise<Remaining>
     teardown? (): Promise<void>
 }
-
-export abstract class AbstractPolicy<T extends RateLimiterOptions> {
-    constructor (
-        protected readonly options: T,
-    ) {}
-}
