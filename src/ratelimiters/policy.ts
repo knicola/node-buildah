@@ -16,6 +16,11 @@ export interface RateLimiterOptions<T = any> {
     store: Store<Subject, T>
 }
 
+/**
+ * The remaining requests
+ * @remarks
+ * - If the value is negative, the request is denied
+ */
 export type Remaining = number
 
 export interface RateLimiterPolicy {
