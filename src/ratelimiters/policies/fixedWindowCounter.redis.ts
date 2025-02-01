@@ -1,4 +1,4 @@
-import type { RateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
+import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
 import type { Redis } from 'ioredis'
 
 const REDIS_LUA_SCRIPT = `
@@ -26,16 +26,14 @@ export interface FixedWindowCounter {
     weight: number
     timestamp: number
 }
-export interface FixedWindowCounterPolicyOptions extends RateLimiterOptions {
-    client: Redis
-}
+export interface RedisFixedWindowCounterPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
 export class FixedWindowCounterPolicy implements RateLimiterPolicy {
     private readonly client: Redis & {
         fixedWindowCounter: (subject: string, weight: number, capacity: number, interval: number) => Promise<number>
     }
 
     constructor (
-        private readonly options: FixedWindowCounterPolicyOptions,
+        private readonly options: RedisFixedWindowCounterPolicyOptions,
     ) {
         this.client = options.client as any
     }
@@ -52,17 +50,11 @@ export class FixedWindowCounterPolicy implements RateLimiterPolicy {
     }
 
     public async check (subject: string, weight: number = this.options.weight ?? 1): Promise<Remaining> {
-        const remaining = await this.client.fixedWindowCounter(
+        return await this.client.fixedWindowCounter(
             subject,
             weight,
             this.options.capacity,
             this.options.interval,
         )
-
-        if (remaining >= 0) {
-            return remaining
-        }
-
-        return -1
     }
 }

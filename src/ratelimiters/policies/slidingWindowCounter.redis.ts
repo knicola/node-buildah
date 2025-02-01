@@ -1,4 +1,4 @@
-import type { RateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
+import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
 import { getMilliseconds } from '../clock'
 import type { Redis } from 'ioredis'
 
@@ -37,16 +37,14 @@ export interface SlidingWindowCounter {
     weight: number
     timestamp: number
 }
-export interface SlidingWindowCounterPolicyOptions extends RateLimiterOptions {
-    client: Redis
-}
+export interface RedisSlidingWindowCounterPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
 export class SlidingWindowCounterPolicy implements RateLimiterPolicy {
     private readonly client: Redis & {
         slidingWindowCounter: (subject: string, weight: number, timestamp: number, capacity: number, interval: number) => Promise<number>
     }
 
     constructor (
-        private readonly options: SlidingWindowCounterPolicyOptions,
+        private readonly options: RedisSlidingWindowCounterPolicyOptions,
     ) {
         this.client = options.client as any
     }
@@ -67,18 +65,12 @@ export class SlidingWindowCounterPolicy implements RateLimiterPolicy {
     }
 
     public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
-        const remaining = await this.client.slidingWindowCounter(
+        return await this.client.slidingWindowCounter(
             subject,
             weight,
             timestamp,
             this.options.capacity,
             this.options.interval,
         )
-
-        if (remaining >= 0) {
-            return remaining
-        }
-
-        return -1
     }
 }

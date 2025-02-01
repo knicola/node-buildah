@@ -1,11 +1,11 @@
-import type { RateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
+import type { MemoryRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
 import { getMilliseconds } from '../clock'
 
 export interface TokenBucket {
     weight: number
     timestamp: number
 }
-export interface TokenBucketPolicyOptions extends RateLimiterOptions<TokenBucket> {
+export interface TokenBucketPolicyOptions extends MemoryRateLimiterOptions<TokenBucket> {
     /** The refill rate in weight per interval */
     refill?: number
 }

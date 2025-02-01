@@ -5,15 +5,23 @@ export interface Store<K = string, V = any> {
 
 export type Subject = string
 
-export interface RateLimiterOptions<T = any> {
+export interface RateLimiterOptions {
     /** The weight of each request */
     weight?: number
     /** The capacity of the rate limiter */
     capacity: number
     /** The time interval in milliseconds */
     interval: number
-    /** The store to use */
+}
+
+export interface MemoryRateLimiterOptions<T = any> extends RateLimiterOptions {
+    /** The memory store to use */
     store: Store<Subject, T>
+}
+
+export interface DistributedRateLimiterOptions<T = any> extends RateLimiterOptions {
+    /** The distributed store client to use */
+    client: T
 }
 
 /**

@@ -1,10 +1,10 @@
-import type { RateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
+import type { MemoryRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
 import { getMilliseconds } from '../clock'
 
 export interface SlidingWindowLog {
     logs: Array<{ weight: number, timestamp: number }>
 }
-export interface SlidingWindowLogPolicyOptions extends RateLimiterOptions<SlidingWindowLog> {}
+export interface SlidingWindowLogPolicyOptions extends MemoryRateLimiterOptions<SlidingWindowLog> {}
 export class SlidingWindowLogPolicy implements RateLimiterPolicy {
     constructor (
         private readonly options: SlidingWindowLogPolicyOptions,
