@@ -9,18 +9,27 @@ local timestamp = tonumber(ARGV[2])
 local capacity = tonumber(ARGV[3])
 local interval = tonumber(ARGV[4])
 
-redis.call("ZREMRANGEBYSCORE", key, 0, timestamp - interval)
-
-local total_weight = redis.call("ZCARD", key)
-
-if total_weight >= capacity then
+if weight > capacity then
     return -1
 end
 
-redis.call("ZADD", key, timestamp, timestamp)
+redis.call("ZREMRANGEBYSCORE", key, 0, timestamp - interval)
+
+local current_weight = 0
+local logs = redis.call("ZRANGE", key, 0, -1, "WITHSCORES")
+
+for i = 1, #logs, 2 do
+    current_weight = current_weight + logs[i]
+end
+
+if current_weight + weight > capacity then
+    return -1
+end
+
+redis.call("ZADD", key, timestamp, weight)
 redis.call("EXPIRE", key, interval)
 
-return capacity - (total_weight + weight)
+return capacity - (current_weight + weight)
 `
 
 export interface SlidingWindowLog {
