@@ -1,31 +1,25 @@
 import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
 import type { Redis } from 'ioredis'
 
-const REDIS_LUA_SCRIPT = `
+const REDIS_LUA_SCRIPT = /* lua */`
 local subject = KEYS[1]
 local weight = tonumber(ARGV[1])
 local capacity = tonumber(ARGV[2])
 local interval = tonumber(ARGV[3])
 
-local total_weight = tonumber(redis.call('GET', subject) or '0')
-
-if total_weight >= capacity then
+local current_weight = tonumber(redis.call('GET', subject)) or 0
+if current_weight + weight > capacity then
     return -1
 end
 
 redis.call('INCRBY', subject, weight)
-
-if total_weight == 0 then
+if current_weight == 0 then
     redis.call('EXPIRE', subject, interval)
 end
 
-return capacity - total_weight - weight
+return capacity - current_weight - weight
 `
 
-export interface FixedWindowCounter {
-    weight: number
-    timestamp: number
-}
 export interface RedisFixedWindowCounterPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
 export class FixedWindowCounterPolicy implements RateLimiterPolicy {
     private readonly client: Redis & {
@@ -39,7 +33,7 @@ export class FixedWindowCounterPolicy implements RateLimiterPolicy {
     }
 
     public async setup (): Promise<void> {
-        if (! ['connect', 'ready'].includes(this.client.status)) {
+        if (! ['connect', 'connecting', 'ready'].includes(this.client.status)) {
             await this.client.connect()
         }
 
