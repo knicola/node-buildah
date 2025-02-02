@@ -9,28 +9,28 @@ local timestamp = tonumber(ARGV[2])
 local capacity = tonumber(ARGV[3])
 local interval = tonumber(ARGV[4])
 
-local record = redis.call("GET", key)
-local record_weight = 0
-local record_timestamp = 0
+local data = redis.call("HMGET", key, "w", "t")
 
-if record then
-    local delimiter_position = string.find(record, ":")
-    if delimiter_position then
-        record_weight = tonumber(string.sub(record, 1, delimiter_position - 1))
-        record_timestamp = tonumber(string.sub(record, delimiter_position + 1))
-    end
+if not data then
+    redis.call("HMSET", key, "w", weight, "t", timestamp)
+    redis.call("PEXPIRE", key, interval)
+    return capacity - weight
 end
+
+local record_weight = tonumber(data[1])
+local record_timestamp = tonumber(data[2])
 
 local decayed_weight = math.ceil(record_weight * math.exp((record_timestamp - timestamp) / interval))
 local total_weight = decayed_weight + weight
 
-if total_weight <= capacity then
-    local new_record = tostring(total_weight) .. ":" .. tostring(timestamp)
-    redis.call("SET", key, new_record, "PX", interval)
-    return capacity - total_weight
+if total_weight >= capacity then
+    return -1
 end
 
-return -1
+redis.call("HMSET", key, "w", total_weight, "t", timestamp)
+redis.call("PEXPIRE", key, interval)
+
+return capacity - total_weight
 `
 
 export interface SlidingWindowCounter {
@@ -61,7 +61,7 @@ export class SlidingWindowCounterPolicy implements RateLimiterPolicy {
     }
 
     public async teardown (): Promise<void> {
-        await this.options.client.quit()
+        await this.client.quit()
     }
 
     public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
