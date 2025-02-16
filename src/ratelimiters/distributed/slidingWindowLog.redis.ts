@@ -2,16 +2,12 @@ import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from
 import { getMilliseconds } from '../clock'
 import type { Redis } from 'ioredis'
 
-const REDIS_LUA_SCRIPT = `
+const REDIS_LUA_SCRIPT = /* lua */`
 local key = KEYS[1]
 local weight = tonumber(ARGV[1])
 local timestamp = tonumber(ARGV[2])
 local capacity = tonumber(ARGV[3])
 local interval = tonumber(ARGV[4])
-
-if weight > capacity then
-    return -1
-end
 
 redis.call("ZREMRANGEBYSCORE", key, 0, timestamp - interval)
 
@@ -32,10 +28,6 @@ redis.call("EXPIRE", key, interval)
 return capacity - (current_weight + weight)
 `
 
-export interface SlidingWindowLog {
-    weight: number
-    timestamp: number
-}
 export interface RedisSlidingWindowLogPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
 export class SlidingWindowLogPolicy implements RateLimiterPolicy {
     private readonly client: Redis & {
