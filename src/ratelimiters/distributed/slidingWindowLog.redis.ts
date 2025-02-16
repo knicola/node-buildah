@@ -29,7 +29,7 @@ return capacity - (current_weight + weight)
 `
 
 export interface RedisSlidingWindowLogPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
-export class SlidingWindowLogPolicy implements RateLimiterPolicy {
+export class RedisSlidingWindowLogPolicy implements RateLimiterPolicy {
     private readonly client: Redis & {
         slidingWindowLog: (subject: string, weight: number, timestamp: number, capacity: number, interval: number) => Promise<number>
     }
@@ -41,7 +41,7 @@ export class SlidingWindowLogPolicy implements RateLimiterPolicy {
     }
 
     public async setup (): Promise<void> {
-        if (! ['connect', 'ready'].includes(this.client.status)) {
+        if (! ['connect', 'connecting', 'ready'].includes(this.client.status)) {
             await this.client.connect()
         }
 

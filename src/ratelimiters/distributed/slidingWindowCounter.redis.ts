@@ -27,12 +27,8 @@ redis.call("PEXPIRE", key, interval)
 return capacity - total_weight
 `
 
-export interface SlidingWindowCounter {
-    weight: number
-    timestamp: number
-}
 export interface RedisSlidingWindowCounterPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
-export class SlidingWindowCounterPolicy implements RateLimiterPolicy {
+export class RedisSlidingWindowCounterPolicy implements RateLimiterPolicy {
     private readonly client: Redis & {
         slidingWindowCounter: (subject: string, weight: number, timestamp: number, capacity: number, interval: number) => Promise<number>
     }

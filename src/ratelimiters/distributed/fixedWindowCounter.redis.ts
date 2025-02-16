@@ -21,7 +21,7 @@ return capacity - current_weight - weight
 `
 
 export interface RedisFixedWindowCounterPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
-export class FixedWindowCounterPolicy implements RateLimiterPolicy {
+export class RedisFixedWindowCounterPolicy implements RateLimiterPolicy {
     private readonly client: Redis & {
         fixedWindowCounter: (subject: string, weight: number, capacity: number, interval: number) => Promise<number>
     }

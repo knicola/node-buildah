@@ -42,23 +42,23 @@ redis.call('PEXPIRE', key, interval)
 return remaining_weight
 `
 
-export interface TokenBucketPolicyOptions extends DistributedRateLimiterOptions<Redis> {
+export interface RedisTokenBucketPolicyOptions extends DistributedRateLimiterOptions<Redis> {
     /** The refill rate in weight per interval */
     refill: number
 }
-export class TokenBucketPolicy implements RateLimiterPolicy {
+export class RedisTokenBucketPolicy implements RateLimiterPolicy {
     private readonly client: Redis & {
         tokenBucket: (subject: string, weight: number, timestamp: number, capacity: number, interval: number, refill: number) => Promise<number>
     }
 
     constructor (
-        private readonly options: TokenBucketPolicyOptions,
+        private readonly options: RedisTokenBucketPolicyOptions,
     ) {
         this.client = options.client as any
     }
 
     public async setup (): Promise<void> {
-        if (! ['connect', 'ready'].includes(this.client.status)) {
+        if (! ['connect', 'connecting', 'ready'].includes(this.client.status)) {
             await this.client.connect()
         }
 
