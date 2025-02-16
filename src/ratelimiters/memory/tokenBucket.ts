@@ -20,23 +20,25 @@ export class TokenBucketPolicy implements RateLimiterPolicy {
         const { refill = 1 } = this.options
 
         if (! record) {
-            await this.options.store.set(subject, { weight, timestamp }, this.options.interval)
-            return this.options.capacity - weight
+            const remainingWeight = this.options.capacity - weight
+            await this.options.store.set(subject, { weight: remainingWeight, timestamp }, this.options.interval)
+            return remainingWeight >= 0 ? remainingWeight : -1
         }
 
         // Calculate refill amount
         const elapsedTime = timestamp - record.timestamp
-        const refillWeight = Math.floor((refill * elapsedTime) / this.options.interval)
+        const refillWeight = Math.floor(refill * elapsedTime / this.options.interval)
 
-        // Recalculate current weight
-        const newWeight = Math.min(this.options.capacity, record.weight + refillWeight)
-        const currentWeight = newWeight - weight
+        // Recalculate remaining weight
+        const currentWeight = Math.min(this.options.capacity, record.weight + refillWeight)
+        const remainingWeight = currentWeight - weight
 
-        if (currentWeight >= 0) {
-            await this.options.store.set(subject, { weight: currentWeight, timestamp }, this.options.interval)
-            return this.options.capacity - currentWeight
+        if (remainingWeight < 0) {
+            return -1
         }
 
-        return -1
+        await this.options.store.set(subject, { weight: remainingWeight, timestamp }, this.options.interval)
+
+        return remainingWeight
     }
 }
