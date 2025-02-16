@@ -19,7 +19,9 @@ export class SlidingWindowCounterPolicy implements RateLimiterPolicy {
             return this.options.capacity - weight
         }
 
-        const totalWeight = record.weight * Math.exp((record.timestamp - timestamp) / this.options.interval) + weight
+        const timeDiff = record.timestamp - timestamp
+        const decayedWeight = record.weight - Math.max(0, record.weight * timeDiff / this.options.interval)
+        const totalWeight = decayedWeight + weight
 
         if (totalWeight <= this.options.capacity) {
             await this.options.store.set(subject, { weight: totalWeight, timestamp }, this.options.interval)
