@@ -1,6 +1,7 @@
-import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
+import type { Remaining } from '../policy'
 import { getMilliseconds } from '../clock'
-import type { Redis } from 'ioredis'
+import type { RedisRateLimiterOptions } from './abstract.redis'
+import { RedisRateLimiterPolicy } from './abstract.redis'
 
 const REDIS_LUA_SCRIPT = /* lua */`
 local key = KEYS[1]
@@ -27,35 +28,13 @@ redis.call("PEXPIRE", key, interval)
 return capacity - total_weight
 `
 
-export interface RedisSlidingWindowCounterPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
-export class RedisSlidingWindowCounterPolicy implements RateLimiterPolicy {
-    private readonly client: Redis & {
-        slidingWindowCounter: (subject: string, weight: number, timestamp: number, capacity: number, interval: number) => Promise<number>
-    }
-
-    constructor (
-        private readonly options: RedisSlidingWindowCounterPolicyOptions,
-    ) {
-        this.client = options.client as any
-    }
-
-    public async setup (): Promise<void> {
-        if (! ['connect', 'connecting', 'ready'].includes(this.client.status)) {
-            await this.client.connect()
-        }
-
-        this.client.defineCommand('slidingWindowCounter', {
-            numberOfKeys: 1,
-            lua: REDIS_LUA_SCRIPT,
-        })
-    }
-
-    public async teardown (): Promise<void> {
-        await this.client.quit()
-    }
+export interface RedisSlidingWindowCounterPolicyOptions extends RedisRateLimiterOptions {}
+export class RedisSlidingWindowCounterPolicy extends RedisRateLimiterPolicy<RedisSlidingWindowCounterPolicyOptions> {
+    protected readonly name = 'SlidingWindowCounter'
+    protected readonly lua = REDIS_LUA_SCRIPT
 
     public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
-        return await this.client.slidingWindowCounter(
+        return this.client[this.name](
             subject,
             weight,
             timestamp,

@@ -1,6 +1,7 @@
-import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
+import type { Remaining } from '../policy'
 import { getMilliseconds } from '../clock'
-import type { Redis } from 'ioredis'
+import type { RedisRateLimiterOptions } from './abstract.redis'
+import { RedisRateLimiterPolicy } from './abstract.redis'
 
 const REDIS_LUA_SCRIPT = /* lua */`
 local key = KEYS[1]
@@ -28,35 +29,13 @@ redis.call("EXPIRE", key, interval)
 return capacity - (current_weight + weight)
 `
 
-export interface RedisSlidingWindowLogPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
-export class RedisSlidingWindowLogPolicy implements RateLimiterPolicy {
-    private readonly client: Redis & {
-        slidingWindowLog: (subject: string, weight: number, timestamp: number, capacity: number, interval: number) => Promise<number>
-    }
-
-    constructor (
-        private readonly options: RedisSlidingWindowLogPolicyOptions,
-    ) {
-        this.client = options.client as any
-    }
-
-    public async setup (): Promise<void> {
-        if (! ['connect', 'connecting', 'ready'].includes(this.client.status)) {
-            await this.client.connect()
-        }
-
-        this.client.defineCommand('slidingWindowLog', {
-            numberOfKeys: 1,
-            lua: REDIS_LUA_SCRIPT,
-        })
-    }
-
-    public async teardown (): Promise<void> {
-        await this.client.quit()
-    }
+export interface RedisSlidingWindowLogPolicyOptions extends RedisRateLimiterOptions {}
+export class RedisSlidingWindowLogPolicy extends RedisRateLimiterPolicy<RedisSlidingWindowLogPolicyOptions> {
+    protected readonly name = 'SlidingWindowLog'
+    protected readonly lua = REDIS_LUA_SCRIPT
 
     public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
-        return await this.client.slidingWindowLog(
+        return this.client[this.name](
             subject,
             weight,
             timestamp,

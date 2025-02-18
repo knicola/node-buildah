@@ -1,5 +1,6 @@
-import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
-import type { Redis } from 'ioredis'
+import type { Remaining } from '../policy'
+import type { RedisRateLimiterOptions } from './abstract.redis'
+import { RedisRateLimiterPolicy } from './abstract.redis'
 
 const REDIS_LUA_SCRIPT = /* lua */`
 local subject = KEYS[1]
@@ -20,31 +21,13 @@ end
 return capacity - current_weight - weight
 `
 
-export interface RedisFixedWindowCounterPolicyOptions extends DistributedRateLimiterOptions<Redis> {}
-export class RedisFixedWindowCounterPolicy implements RateLimiterPolicy {
-    private readonly client: Redis & {
-        fixedWindowCounter: (subject: string, weight: number, capacity: number, interval: number) => Promise<number>
-    }
-
-    constructor (
-        private readonly options: RedisFixedWindowCounterPolicyOptions,
-    ) {
-        this.client = options.client as any
-    }
-
-    public async setup (): Promise<void> {
-        if (! ['connect', 'connecting', 'ready'].includes(this.client.status)) {
-            await this.client.connect()
-        }
-
-        this.client.defineCommand('fixedWindowCounter', {
-            numberOfKeys: 1,
-            lua: REDIS_LUA_SCRIPT,
-        })
-    }
+export interface RedisFixedWindowCounterPolicyOptions extends RedisRateLimiterOptions {}
+export class RedisFixedWindowCounterPolicy extends RedisRateLimiterPolicy<RedisFixedWindowCounterPolicyOptions> {
+    protected readonly name = 'FixedWindowCounter'
+    protected readonly lua = REDIS_LUA_SCRIPT
 
     public async check (subject: string, weight: number = this.options.weight ?? 1): Promise<Remaining> {
-        return await this.client.fixedWindowCounter(
+        return this.client[this.name](
             subject,
             weight,
             this.options.capacity,
