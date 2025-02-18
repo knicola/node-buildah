@@ -3,6 +3,8 @@ import Redis from 'ioredis'
 import { RedisSlidingWindowCounterPolicy } from './slidingWindowCounter.redis'
 import { randomString } from '@/utilities/utilities'
 
+const getSubject = () => `SlidingWindowCounter:${randomString()}`
+
 describe('RedisSlidingWindowCounterPolicy', () => {
     let redis: Redis
     let policy: RedisSlidingWindowCounterPolicy
@@ -26,7 +28,7 @@ describe('RedisSlidingWindowCounterPolicy', () => {
 
     describe('check', () => {
         it('should successfully limit within the capacity of the sliding window', async () => {
-            const subject = randomString()
+            const subject = getSubject()
 
             let timestamp = 0
             let remaining = await policy.check(subject, 2, timestamp)
@@ -42,13 +44,13 @@ describe('RedisSlidingWindowCounterPolicy', () => {
         })
 
         it('should return -1 when exceeding capacity of the sliding window', async () => {
-            const subject = randomString()
+            const subject = getSubject()
             const remaining = await policy.check(subject, 12)
             expect(remaining).toBe(-1)
         })
 
         it('should expire the key after the interval', async () => {
-            const subject = randomString()
+            const subject = getSubject()
 
             await policy.check(subject)
             const ttl = await redis.pttl(subject)
