@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeAll } from 'vitest'
 import Redis from 'ioredis'
 import { RedisFixedWindowCounterPolicy } from './fixedWindowCounter.redis'
 import { randomString } from '@/utilities/utilities'
@@ -19,10 +19,6 @@ describe('RedisFixedWindowCounterPolicy', () => {
         })
         // @todo write test case
         await policy.setup()
-    })
-
-    afterAll(async () => {
-        await redis.quit()
     })
 
     describe('check', () => {
