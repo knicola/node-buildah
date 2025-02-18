@@ -15,7 +15,7 @@ end
 
 redis.call('INCRBY', subject, weight)
 if current_weight == 0 then
-    redis.call('EXPIRE', subject, interval)
+    redis.call('PEXPIRE', subject, interval)
 end
 
 return capacity - current_weight - weight
