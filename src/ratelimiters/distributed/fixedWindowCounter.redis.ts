@@ -26,7 +26,7 @@ export class RedisFixedWindowCounterPolicy extends RedisRateLimiterPolicy<RedisF
     protected readonly name = 'FixedWindowCounter'
     protected readonly lua = REDIS_LUA_SCRIPT
 
-    public async check (subject: string, weight: number = this.options.weight ?? 1): Promise<Remaining> {
+    public async consume (subject: string, weight: number = this.options.weight ?? 1): Promise<Remaining> {
         return this.client[this.name](
             subject,
             weight,

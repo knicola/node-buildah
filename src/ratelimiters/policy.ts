@@ -33,6 +33,6 @@ export type Remaining = number
 
 export interface RateLimiterPolicy {
     setup? (): Promise<void>
-    check (subject: string, weight?: number, timestamp?: number): Promise<Remaining>
+    consume (subject: string, weight?: number, timestamp?: number): Promise<Remaining>
     teardown? (): Promise<void>
 }

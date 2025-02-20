@@ -14,7 +14,7 @@ export class TokenBucketPolicy implements RateLimiterPolicy {
         private readonly options: TokenBucketPolicyOptions,
     ) {}
 
-    public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
+    public async consume (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
         const record = await this.options.store.get(subject)
 
         const { refill = 1 } = this.options

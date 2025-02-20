@@ -51,7 +51,7 @@ export class RedisTokenBucketPolicy extends RedisRateLimiterPolicy<RedisTokenBuc
     protected readonly name = 'TokenBucket'
     protected readonly lua = REDIS_LUA_SCRIPT
 
-    public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
+    public async consume (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
         return this.client[this.name](
             subject,
             weight,

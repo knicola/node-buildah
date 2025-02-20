@@ -22,33 +22,33 @@ describe('RedisSlidingWindowCounterPolicy', () => {
         await policy.setup()
     })
 
-    describe('check', () => {
+    describe('consume', () => {
         it('should successfully limit within the capacity of the sliding window', async () => {
             const subject = getSubject()
 
             let timestamp = 0
-            let remaining = await policy.check(subject, 2, timestamp)
+            let remaining = await policy.consume(subject, 2, timestamp)
             expect(remaining).toBe(8)
 
             timestamp += 10e3
-            remaining = await policy.check(subject, 2, timestamp)
+            remaining = await policy.consume(subject, 2, timestamp)
             expect(remaining).toBe(6)
 
             timestamp += 20e3
-            remaining = await policy.check(subject, 2, timestamp)
+            remaining = await policy.consume(subject, 2, timestamp)
             expect(remaining).toBe(5)
         })
 
         it('should return -1 when exceeding capacity of the sliding window', async () => {
             const subject = getSubject()
-            const remaining = await policy.check(subject, 12)
+            const remaining = await policy.consume(subject, 12)
             expect(remaining).toBe(-1)
         })
 
         it('should expire the key after the interval', async () => {
             const subject = getSubject()
 
-            await policy.check(subject)
+            await policy.consume(subject)
             const ttl = await redis.pttl(subject)
 
             expect(ttl).toBeGreaterThan(0)

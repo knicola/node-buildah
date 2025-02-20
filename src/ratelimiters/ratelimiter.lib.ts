@@ -4,12 +4,12 @@ type _internal = Required<RateLimiterPolicy>
 
 export function defineRateLimiter (policies: RateLimiterPolicy[]) {
     const setupQueue: Array<_internal['setup']> = []
-    const applyQueue: Array<_internal['check']> = []
+    const applyQueue: Array<_internal['consume']> = []
     const teardownQueue: Array<_internal['teardown']> = []
 
     policies.forEach((policy) => {
         if (policy.setup) { setupQueue.push(policy.setup) }
-        if (policy.check) { applyQueue.push(policy.check) }
+        if (policy.consume) { applyQueue.push(policy.consume) }
         if (policy.teardown) { teardownQueue.push(policy.teardown) }
     })
 

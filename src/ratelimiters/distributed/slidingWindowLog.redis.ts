@@ -34,7 +34,7 @@ export class RedisSlidingWindowLogPolicy extends RedisRateLimiterPolicy<RedisSli
     protected readonly name = 'SlidingWindowLog'
     protected readonly lua = REDIS_LUA_SCRIPT
 
-    public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
+    public async consume (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
         return this.client[this.name](
             subject,
             weight,

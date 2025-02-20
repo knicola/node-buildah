@@ -9,7 +9,7 @@ const policy = new FixedWindowCounterPolicy({
     store: new MemoryStore(),
 })
 
-const remaining = await policy.check('<user_id>', 2)
+const remaining = await policy.consume('<user_id>', 2)
 
 remaining >= 0 // allowed
 remaining <= -1 // denied

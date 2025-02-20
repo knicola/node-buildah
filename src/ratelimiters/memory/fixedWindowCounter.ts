@@ -11,7 +11,7 @@ export class FixedWindowCounterPolicy implements RateLimiterPolicy {
         private readonly options: FixedWindowCounterPolicyOptions,
     ) {}
 
-    public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
+    public async consume (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
         const entry = await this.options.store.get(subject)
 
         if (! entry || entry.timestamp + this.options.interval <= timestamp) {

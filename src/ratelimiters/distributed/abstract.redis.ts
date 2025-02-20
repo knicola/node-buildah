@@ -26,10 +26,10 @@ export abstract class RedisRateLimiterPolicy<T extends RedisRateLimiterOptions> 
         })
     }
 
-    public abstract check (subject: string, weight: number): Promise<Remaining>
+    public abstract consume (subject: string, weight: number): Promise<Remaining>
 
     public async peek (subject: string): Promise<Remaining> {
-        return await this.check(subject, 0)
+        return await this.consume(subject, 0)
     }
 
     public async teardown (): Promise<void> {

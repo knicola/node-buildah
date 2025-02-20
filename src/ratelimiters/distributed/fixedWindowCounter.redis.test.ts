@@ -21,26 +21,26 @@ describe('RedisFixedWindowCounterPolicy', () => {
         await policy.setup()
     })
 
-    describe('check', () => {
+    describe('consume', () => {
         it('should successfully limit within the capacity of the fixed window', async () => {
             const subject = getSubject()
 
-            let remaining = await policy.check(subject)
+            let remaining = await policy.consume(subject)
             expect(remaining).toBe(8)
 
-            remaining = await policy.check(subject)
+            remaining = await policy.consume(subject)
             expect(remaining).toBe(6)
         })
 
         it('should return -1 when exceeding capacity of the fixed window', async () => {
             const subject = getSubject()
 
-            await policy.check(subject)
-            await policy.check(subject)
-            await policy.check(subject)
-            await policy.check(subject)
-            await policy.check(subject)
-            const remaining = await policy.check(subject)
+            await policy.consume(subject)
+            await policy.consume(subject)
+            await policy.consume(subject)
+            await policy.consume(subject)
+            await policy.consume(subject)
+            const remaining = await policy.consume(subject)
 
             expect(remaining).toBe(-1)
         })
@@ -48,7 +48,7 @@ describe('RedisFixedWindowCounterPolicy', () => {
         it('should expire the key after the interval', async () => {
             const subject = getSubject()
 
-            await policy.check(subject)
+            await policy.consume(subject)
             const ttl = await redis.ttl(subject)
 
             expect(ttl).toBeGreaterThan(0)

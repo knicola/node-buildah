@@ -11,7 +11,7 @@ export class SlidingWindowCounterPolicy implements RateLimiterPolicy {
         private readonly options: SlidingWindowCounterPolicyOptions,
     ) {}
 
-    public async check (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
+    public async consume (subject: string, weight: number = this.options.weight ?? 1, timestamp = getMilliseconds()): Promise<Remaining> {
         const record = await this.options.store.get(subject)
 
         if (! record) {
