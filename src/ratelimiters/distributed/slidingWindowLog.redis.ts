@@ -13,20 +13,20 @@ local interval = tonumber(ARGV[4])
 redis.call("ZREMRANGEBYSCORE", key, 0, timestamp - interval)
 
 local current_weight = 0
-local logs = redis.call("ZRANGE", key, 0, -1, "WITHSCORES")
-
-for i = 1, #logs, 2 do
-    current_weight = current_weight + logs[i]
+local logs = redis.call("ZRANGE", key, 0, -1)
+for i = 1, #logs do
+    current_weight = current_weight + tonumber(string.match(logs[i], ":(%d+)"))
 end
 
-if current_weight + weight > capacity then
+local remaining = capacity - (current_weight + weight)
+if remaining < 0 then
     return -1
 end
 
-redis.call("ZADD", key, timestamp, weight)
-redis.call("EXPIRE", key, interval)
+redis.call("ZADD", key, timestamp, timestamp .. ":" .. weight)
+redis.call("PEXPIRE", key, interval)
 
-return capacity - (current_weight + weight)
+return remaining
 `
 
 export interface RedisSlidingWindowLogPolicyOptions extends RedisRateLimiterOptions {}
