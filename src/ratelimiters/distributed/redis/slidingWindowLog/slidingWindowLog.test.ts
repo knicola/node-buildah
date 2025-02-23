@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import Redis from 'ioredis'
-import { RedisSlidingWindowLogPolicy } from './slidingWindowLog.redis'
+import { RedisSlidingWindowLogPolicy } from './slidingWindowLog'
 import { randomString } from '@/utilities/utilities'
 
 const getSubject = () => `SlidingWindowLog:${randomString()}`

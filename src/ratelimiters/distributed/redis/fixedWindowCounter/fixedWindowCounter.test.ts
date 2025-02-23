@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 import Redis from 'ioredis'
-import { RedisFixedWindowCounterPolicy } from './fixedWindowCounter.redis'
+import { RedisFixedWindowCounterPolicy } from './fixedWindowCounter'
 import { randomString } from '@/utilities/utilities'
 
 const getSubject = () => `FixedWindowCounter:${randomString()}`

@@ -1,6 +1,6 @@
 import type { Remaining } from '../../../policy'
-import type { RedisRateLimiterOptions } from '../abstract.redis'
-import { RedisRateLimiterPolicy } from '../abstract.redis'
+import type { RedisRateLimiterOptions } from '../abstract'
+import { RedisRateLimiterPolicy } from '../abstract'
 
 const REDIS_LUA_SCRIPT = /* lua */`
 local subject = KEYS[1]

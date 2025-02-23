@@ -1,7 +1,7 @@
 import type { Remaining } from '../../../policy'
 import { getMilliseconds } from '../../../clock'
-import type { RedisRateLimiterOptions } from '../abstract.redis'
-import { RedisRateLimiterPolicy } from '../abstract.redis'
+import type { RedisRateLimiterOptions } from '../abstract'
+import { RedisRateLimiterPolicy } from '../abstract'
 
 const REDIS_LUA_SCRIPT = /* lua */`
 local key = KEYS[1]
