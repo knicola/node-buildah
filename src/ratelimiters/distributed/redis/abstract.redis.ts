@@ -1,5 +1,5 @@
 import type Redis from 'ioredis'
-import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from '../policy'
+import type { DistributedRateLimiterOptions, RateLimiterPolicy, Remaining } from '../../policy'
 
 export interface RedisRateLimiterOptions extends DistributedRateLimiterOptions<Redis> {}
 
