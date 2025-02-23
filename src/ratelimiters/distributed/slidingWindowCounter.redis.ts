@@ -10,7 +10,7 @@ local timestamp = tonumber(ARGV[2])
 local capacity = tonumber(ARGV[3])
 local interval = tonumber(ARGV[4])
 
-local data = redis.call("HMGET", key, "w", "t")
+local data = redis.call("HMGET", key, "weight", "timestamp")
 local record_weight = tonumber(data[1]) or 0
 local record_timestamp = tonumber(data[2]) or timestamp
 
@@ -22,7 +22,7 @@ if total_weight >= capacity then
     return -1
 end
 
-redis.call("HMSET", key, "w", total_weight, "t", timestamp)
+redis.call("HMSET", key, "weight", total_weight, "timestamp", timestamp)
 redis.call("PEXPIRE", key, interval)
 
 return capacity - total_weight
